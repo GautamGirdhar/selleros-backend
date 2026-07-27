@@ -70,3 +70,9 @@ class TokenSchema(Schema):
 class AuthResponseSchema(Schema):
     user: UserResponseSchema
     tokens: TokenSchema
+
+class LogoutSchema(Schema):
+    refresh_token: str
+    
+class GoogleAuthSchema(Schema):
+    code: str

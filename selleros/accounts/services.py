@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from .google import exchange_code_for_user
 
 from .auth import blacklist_token, create_tokens, refresh_access
 from .models import OTPVerification, VerificationChannel
@@ -200,3 +201,40 @@ def logout_user(refresh_token: str):
 
 def refresh_user_token(refresh_token: str):
     return refresh_access(refresh_token)
+
+
+def google_login(code: str):
+
+    google_user = exchange_code_for_user(code)
+
+    email = google_user["email"]
+
+    user = User.objects.filter(email=email).first()
+
+    if not user:
+
+        user = User.objects.create_user(
+            email=email,
+            full_name=google_user["name"],
+            phone_number="",
+            password=None,
+            is_active=True,
+            is_email_verified=True,
+            avatar=google_user["picture"],
+            auth_provider="GOOGLE"
+
+        )
+
+    return {
+    "user": {
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "avatar": user.avatar,
+        "is_email_verified": user.is_email_verified,
+        "is_phone_verified": user.is_phone_verified,
+        "auth_provider": user.auth_provider,
+    },
+    "tokens": create_tokens(user),
+}

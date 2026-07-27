@@ -9,6 +9,8 @@ from .schemas import (
     AuthResponseSchema,
     MessageSchema,
     OtpSentSchema,
+    LogoutSchema,
+    GoogleAuthSchema,
 )
 
 from .services import (
@@ -22,6 +24,7 @@ from .services import (
     UserAlreadyExists,
     OTPError,
     OTPDeliveryError,
+    google_login,
 )
 
 router = Router(tags=["Authentication"])
@@ -102,9 +105,9 @@ def login(request, payload: LoginSchema):
 
 
 @router.post("/logout", response=MessageSchema)
-def logout(request, refresh_token: str):
+def logout(request, payload: LogoutSchema):
     try:
-        logout_user(refresh_token)
+        logout_user(payload.refresh_token)
 
         return {
             "success": True,
@@ -114,7 +117,6 @@ def logout(request, refresh_token: str):
     except AuthenticationError as e:
         raise HttpError(400, str(e))
 
-
 @router.post("/refresh")
 def refresh(request, refresh_token: str):
     try:
@@ -122,3 +124,7 @@ def refresh(request, refresh_token: str):
 
     except AuthenticationError as e:
         raise HttpError(401, str(e))
+
+@router.post("/google", response=AuthResponseSchema)
+def google_auth(request, payload: GoogleAuthSchema):
+    return google_login(payload.code)
