@@ -76,3 +76,11 @@ class LogoutSchema(Schema):
     
 class GoogleAuthSchema(Schema):
     code: str
+    
+class UserSchema(Schema):
+    id: str
+    full_name: str
+    email: str
+    avatar: str | None
+    is_email_verified: bool
+    is_phone_verified: bool

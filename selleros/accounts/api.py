@@ -1,5 +1,8 @@
 from ninja import Router
 from ninja.errors import HttpError
+from .auth import get_authenticated_user
+from .services import get_current_user
+
 
 from .schemas import (
     RegisterSchema,
@@ -25,6 +28,7 @@ from .services import (
     OTPError,
     OTPDeliveryError,
     google_login,
+    get_current_user,
 )
 
 router = Router(tags=["Authentication"])
@@ -128,3 +132,14 @@ def refresh(request, refresh_token: str):
 @router.post("/google", response=AuthResponseSchema)
 def google_auth(request, payload: GoogleAuthSchema):
     return google_login(payload.code)
+
+@router.get("/me")
+def me(request):
+    auth_header = request.headers.get("Authorization")
+
+    user = get_authenticated_user(auth_header)
+
+    if not user:
+        raise HttpError(401, "Authentication required.")
+
+    return get_current_user(user)

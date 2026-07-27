@@ -190,7 +190,17 @@ def login_user(*, username: str, password: str):
 def get_current_user(user):
     if not user:
         raise AuthenticationError("Authentication required.")
-    return user
+
+    return {
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "avatar": user.avatar,
+        "is_email_verified": user.is_email_verified,
+        "is_phone_verified": user.is_phone_verified,
+        "auth_provider": user.auth_provider,
+    }
 
 
 def logout_user(refresh_token: str):
