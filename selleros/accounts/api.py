@@ -2,6 +2,7 @@ from ninja import Router
 from ninja.errors import HttpError
 from .auth import get_authenticated_user
 from .services import get_current_user
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 
 from .schemas import (
@@ -14,6 +15,8 @@ from .schemas import (
     OtpSentSchema,
     LogoutSchema,
     GoogleAuthSchema,
+    RefreshSchema,
+    AccessTokenSchema,
 )
 
 from .services import (
@@ -121,12 +124,11 @@ def logout(request, payload: LogoutSchema):
     except AuthenticationError as e:
         raise HttpError(400, str(e))
 
-@router.post("/refresh")
-def refresh(request, refresh_token: str):
+@router.post("/refresh", response=AccessTokenSchema)
+def refresh(request, payload: RefreshSchema):
     try:
-        return refresh_user_token(refresh_token)
-
-    except AuthenticationError as e:
+        return refresh_user_token(payload.refresh_token)
+    except InvalidToken as e:
         raise HttpError(401, str(e))
 
 @router.post("/google", response=AuthResponseSchema)

@@ -84,3 +84,9 @@ class UserSchema(Schema):
     avatar: str | None
     is_email_verified: bool
     is_phone_verified: bool
+    
+class RefreshSchema(Schema):
+    refresh_token: str
+
+class AccessTokenSchema(Schema):
+    access: str
